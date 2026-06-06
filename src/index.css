@@ -1,37 +1,422 @@
-
 @import "tailwindcss";
 
+/* ── Custom Theme Tokens ─────────────────────────────────────────── */
+@theme {
+  --font-display: "Fredoka", "ui-rounded", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --color-bg-base: oklch(10% 0.02 280);
+  --color-bg-raised: oklch(14% 0.025 280);
+  --color-bg-card: oklch(18% 0.03 280);
+  --color-bg-overlay: oklch(8% 0.02 280 / 80%);
+
+  --color-accent: oklch(62% 0.28 290);
+  --color-accent-warm: oklch(75% 0.22 75);   /* amber gold — setup/CTA */
+  --color-success: oklch(72% 0.22 145);
+  --color-muted: oklch(55% 0.01 280);
+  --color-border: oklch(25% 0.03 280);
+
+  --radius-card: 1.25rem;
+  --radius-btn: 0.875rem;
+}
+
+/* ── Player colors (used in inline JSX styles — must be in :root, not @theme) */
 :root {
-  /* --text: #6b6375; */
-  --text-h: #08060d;
-  --bg: #16171d;
-  --border: #09080b;
+  --color-player-rose: oklch(65% 0.25 15);
+  --color-player-amber: oklch(72% 0.22 75);
+  --color-player-lime: oklch(72% 0.22 135);
+  --color-player-teal: oklch(68% 0.20 185);
+  --color-player-sky: oklch(68% 0.20 225);
+  --color-player-violet: oklch(62% 0.25 275);
+  --color-player-fuchsia: oklch(65% 0.28 310);
+  --color-player-orange: oklch(70% 0.23 50);
+}
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+/* ── Keyframes ───────────────────────────────────────────────────── */
+@keyframes confetti-fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(110vh) rotate(600deg); opacity: 0; }
+}
 
-  background: var(--bg);
-
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-
-
-body {
-background: var(--bg);
-  display: flex;
-  place-items: center;
-  min-height: 100vh;
-  min-width: 320px;
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-#root {
-  
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--glow-color, transparent);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px var(--glow-color, transparent);
+  }
+}
+
+/* ── Aurora background ───────────────────────────────────────────── */
+@keyframes aurora-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(6%, 4%) scale(1.05); }
+  66%       { transform: translate(-4%, 8%) scale(0.97); }
+}
+@keyframes aurora-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%       { transform: translate(-8%, -5%) scale(1.08); }
+  70%       { transform: translate(5%, -10%) scale(0.95); }
+}
+
+/* ── Viewport-responsive font scale ──────────────────────────────── */
+/* Scales all rem-based sizes (Tailwind utilities) proportionally.    */
+/* Phone/tablet: unchanged. TV/large: grows with viewport width.      */
+/* Browser zoom multiplies on top — couch-distance usability.         */
+@media (min-width: 1280px) {
+  html {
+    font-size: clamp(1rem, 1.15vw, 1.75rem);
+  }
+}
+
+/* Legacy attribute-based overrides (kept for compat, unused) */
+[data-font-size="lg"]  { font-size: 112%; }
+[data-font-size="xl"]  { font-size: 126%; }
+
+/* ── Reduce-motion guard — suppress motion/react animations ──────── */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+
+/* ── Base Layer ──────────────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    font-family: var(--font-body);
+    color-scheme: dark;
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg-base);
+    color: oklch(94% 0.01 280);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100%;
+    min-height: 100dvh;
+  }
+
+  #root {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  button,
+  [role="button"] {
+    min-height: 2.75rem;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  input,
+  textarea {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
+/* ── Components ─────────────────────────────────────────────────── */
+/*
+ * Extracted structural patterns. Use these in JSX instead of repeating
+ * the full Tailwind utility string. New pages MUST use these; don't add
+ * page-structure styles inline.
+ */
+@layer components {
+  /* Outer shell for pages with a sticky header + footer. */
+  .page-root {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-base);
+  }
+
+  /* Sticky page header used on all inner pages. */
+  .page-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: color-mix(in oklch, var(--color-bg-base) 90%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid oklch(100% 0 0 / 8%);
+    padding: max(1rem, env(safe-area-inset-top)) 1rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* Scrollable main content area (flex-1 so it fills between header+footer). */
+  .page-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem 1rem;
+  }
+
+  /* Sticky footer that holds the primary CTA button. */
+  .page-footer {
+    position: sticky;
+    bottom: 0;
+    background-color: color-mix(in oklch, var(--color-bg-base) 90%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid oklch(100% 0 0 / 8%);
+    padding: 0.75rem 1rem max(1rem, env(safe-area-inset-bottom));
+  }
+
+  /* Back / close icon button in page headers. */
+  .btn-back {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    border-radius: 0.75rem;
+    background-color: oklch(100% 0 0 / 8%);
+    color: oklch(100% 0 0 / 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 150ms;
+  }
+  .btn-back:hover {
+    background-color: oklch(100% 0 0 / 15%);
+  }
+
+  /* Section label inside a scrollable page. */
+  .section-heading {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: white;
+    font-size: 0.9375rem;   /* ~15px, between text-sm and text-base */
+    margin-bottom: 0.75rem;
+  }
+
+  /* Base card surface. Compose with additional utilities as needed. */
+  .card {
+    background-color: var(--color-bg-card);
+    border-radius: var(--radius-card);
+    border: 1px solid oklch(100% 0 0 / 8%);
+  }
+
+  /* Aurora background layer for GamePage */
+  .aurora-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .aurora-bg::before,
+  .aurora-bg::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+  }
+  .aurora-bg::before {
+    width: 70%;
+    height: 50%;
+    top: -15%;
+    left: -10%;
+    background: radial-gradient(ellipse, oklch(62% 0.28 290) 0%, transparent 70%);
+    animation: aurora-drift-1 22s ease-in-out infinite;
+    opacity: 0.12;
+  }
+  .aurora-bg::after {
+    width: 60%;
+    height: 55%;
+    bottom: -10%;
+    right: -5%;
+    background: radial-gradient(ellipse, oklch(65% 0.25 15) 0%, transparent 70%);
+    animation: aurora-drift-2 28s ease-in-out infinite;
+    opacity: 0.10;
+  }
+  [data-reduce-fx="true"] .aurora-bg {
+    display: none;
+  }
+
+  /* Stats ticker */
+  @keyframes ticker-scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .ticker-track {
+    animation: ticker-scroll 18s linear infinite;
+  }
+
+  /* Player avatar circle */
+  .player-avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1.5px solid oklch(100% 0 0 / 20%);
+  }
+  .player-avatar-sm {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* Primary CTA button used on setup/wizard screens. */
+  .setup-cta {
+    width: 100%;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    border-radius: 1rem;
+    background-color: var(--color-accent-warm);
+    color: oklch(10% 0.01 75);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    transition: background-color 150ms, transform 100ms;
+    outline: none;
+  }
+  .setup-cta:hover {
+    background-color: oklch(80% 0.22 75);
+  }
+  .setup-cta:active {
+    transform: scale(0.98);
+    background-color: oklch(70% 0.22 75);
+  }
+  .setup-cta:focus-visible {
+    outline: 2px solid var(--color-accent-warm);
+    outline-offset: 3px;
+  }
+
+  /* Interactive card — adds hover affordance to .card. */
+  .card-interactive {
+    background-color: var(--color-bg-card);
+    border-radius: var(--radius-card);
+    border: 1px solid oklch(100% 0 0 / 8%);
+    transition: border-color 150ms;
+  }
+  .card-interactive:hover {
+    border-color: oklch(100% 0 0 / 15%);
+  }
+}
+
+/* ── Utilities ───────────────────────────────────────────────────── */
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .bg-base {
+    background-color: var(--color-bg-base);
+  }
+  .bg-raised {
+    background-color: var(--color-bg-raised);
+  }
+  .bg-card {
+    background-color: var(--color-bg-card);
+  }
+
+  .text-muted {
+    color: var(--color-muted);
+  }
+
+  .border-subtle {
+    border-color: var(--color-border);
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.3s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  /* Safe area padding */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .pt-safe {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  /* Scrollbar */
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── lite-mode: low-capability device optimizations ──────────────────
+   Applies to PS5 (WebKit, no GPU blur), slow/save-data connections,
+   and low-end CPUs (≤2 cores). Set via html.lite-mode in main.tsx.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* Kill aurora — animated blur is the #1 FPS killer on weak GPUs */
+html.lite-mode .aurora-bg { display: none; }
+
+/* Opaque headers/footers — backdrop-filter: blur() tanks frame rate */
+html.lite-mode .page-header {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background-color: var(--color-bg-base);
+}
+html.lite-mode .page-footer {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background-color: var(--color-bg-base);
+}
+
+/* Scale up tap targets for TV/cursor navigation */
+html.ps5 .player-avatar       { width: 2.25rem; height: 2.25rem; }
+html.ps5 .player-avatar-sm    { width: 1.5rem;  height: 1.5rem;  }
+html.ps5 .section-heading     { font-size: 1.1rem; }
+html.ps5 button                { min-height: 3rem; font-size: 1rem; }
+html.ps5 .btn-back             { width: 2.75rem; height: 2.75rem; }
