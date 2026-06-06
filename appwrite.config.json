@@ -42,7 +42,7 @@
       "logging": true,
       "framework": "react",
       "timeout": 30,
-      "installCommand": "npm install -g pnpm && pnpm install",
+      "installCommand": "npm install -g pnpm@11.5.2 && pnpm install",
       "buildCommand": "pnpm build",
       "outputDirectory": "./dist",
       "specification": "s-1vcpu-512mb",
