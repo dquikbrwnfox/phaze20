@@ -42,7 +42,7 @@ export default function SetupPage() {
     if (isJoin) {
       await joinGame(joinCode.trim().toUpperCase(), name.trim(), color, userId);
       const game = useTrackerStore.getState().game;
-      if (game) navigate(`/game/${game.id}`);
+      if (game) navigate(`/game/${game.id}?code=${game.joinCode}`);
     } else {
       const set = allSets.find((s) => s.id === phaseSetId) ?? BUILTIN_PHASE_SETS[0];
       const phases = set.isBuiltin
