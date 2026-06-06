@@ -10,11 +10,23 @@ import { WebSocket } from "ws";
 const g = global as unknown as Record<string, unknown>;
 g.WebSocket = WebSocket;
 g.window = {
-  setInterval, clearInterval, setTimeout, clearTimeout,
+  setInterval,
+  clearInterval,
+  setTimeout,
+  clearTimeout,
   localStorage: { getItem: () => null, setItem: () => {}, removeItem: () => {} },
 };
 
-import { Client, Databases, ID, Permission, Role, Query, Realtime, AppwriteException } from "appwrite";
+import {
+  Client,
+  Databases,
+  ID,
+  Permission,
+  Role,
+  Query,
+  Realtime,
+  AppwriteException,
+} from "appwrite";
 import * as NodeAppwrite from "node-appwrite";
 import { rowsToGame } from "../src/lib/realtimeGame.js";
 import type { GameRow, PlayerRow, ReactionRow } from "../src/types/index.js";
@@ -25,7 +37,12 @@ const ENDPOINT = process.env.VITE_APPWRITE_ENDPOINT ?? "https://nyc.cloud.appwri
 const PROJECT_ID = process.env.VITE_APPWRITE_PROJECT_ID ?? "6a228c77000c28cb23ec";
 const API_KEY = process.env.APPWRITE_API_KEY ?? "";
 const DB_ID = "phaze20";
-const TABLE = { GAMES: "games", PLAYERS: "players", PRESENCE: "presence", REACTIONS: "reactions" } as const;
+const TABLE = {
+  GAMES: "games",
+  PLAYERS: "players",
+  PRESENCE: "presence",
+  REACTIONS: "reactions",
+} as const;
 
 if (!API_KEY) {
   console.error("✗ APPWRITE_API_KEY env var required. Export it before running.");
@@ -35,10 +52,7 @@ if (!API_KEY) {
 // ─── Server SDK (session bootstrap + cleanup) ─────────────────────────────────
 
 function makeServerClient() {
-  return new NodeAppwrite.Client()
-    .setEndpoint(ENDPOINT)
-    .setProject(PROJECT_ID)
-    .setKey(API_KEY);
+  return new NodeAppwrite.Client().setEndpoint(ENDPOINT).setProject(PROJECT_ID).setKey(API_KEY);
 }
 
 // ─── Web SDK client factory ───────────────────────────────────────────────────
@@ -57,8 +71,13 @@ function makeWebClient(sessionSecret: string) {
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
 
-function pass(msg: string) { console.log(`  ✓ ${msg}`); }
-function fail(msg: string) { console.error(`  ✗ FAIL: ${msg}`); process.exitCode = 1; }
+function pass(msg: string) {
+  console.log(`  ✓ ${msg}`);
+}
+function fail(msg: string) {
+  console.error(`  ✗ FAIL: ${msg}`);
+  process.exitCode = 1;
+}
 
 function assert(cond: boolean, msg: string) {
   if (cond) pass(msg);
@@ -74,7 +93,10 @@ function waitForEvent(
   timeoutMs = 10000,
 ): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error(`Timeout waiting for realtime event on ${channel}`)), timeoutMs);
+    const t = setTimeout(
+      () => reject(new Error(`Timeout waiting for realtime event on ${channel}`)),
+      timeoutMs,
+    );
 
     let triggered = false;
     const maybeTrigger = async () => {
@@ -102,14 +124,24 @@ function generateJoinCode(): string {
 }
 
 const cleanupTasks: Array<() => Promise<void>> = [];
-function registerCleanup(fn: () => Promise<void>) { cleanupTasks.push(fn); }
+function registerCleanup(fn: () => Promise<void>) {
+  cleanupTasks.push(fn);
+}
 
 async function runCleanup(serverUsers: NodeAppwrite.Users, userIds: string[]) {
   for (const task of cleanupTasks.reverse()) {
-    try { await task(); } catch { /* ignore */ }
+    try {
+      await task();
+    } catch {
+      /* ignore */
+    }
   }
   for (const uid of userIds) {
-    try { await serverUsers.delete(uid); } catch { /* ignore */ }
+    try {
+      await serverUsers.delete(uid);
+    } catch {
+      /* ignore */
+    }
   }
 }
 
@@ -148,20 +180,49 @@ async function main() {
     const joinCode = generateJoinCode();
     const phasesSnapshot = JSON.stringify([
       { id: "p1", number: 1, rule: "2 sets of 3", constraint: null, isBuiltin: true },
-      { id: "p2", number: 2, rule: "1 run of 7",  constraint: null, isBuiltin: true },
+      { id: "p2", number: 2, rule: "1 run of 7", constraint: null, isBuiltin: true },
     ]);
 
     const gameDoc = await A.databases.createDocument<GameRow>(
-      DB_ID, TABLE.GAMES, gameId,
-      { joinCode, status: "active", round: 1, orderedCount: 2, phaseSetId: "classic", phasesSnapshot, hostId: userIdA, createdAt: Date.now() },
-      [Permission.read(Role.any()), Permission.update(Role.user(userIdA)), Permission.delete(Role.user(userIdA))],
+      DB_ID,
+      TABLE.GAMES,
+      gameId,
+      {
+        joinCode,
+        status: "active",
+        round: 1,
+        orderedCount: 2,
+        phaseSetId: "classic",
+        phasesSnapshot,
+        hostId: userIdA,
+        createdAt: Date.now(),
+      },
+      [
+        Permission.read(Role.any()),
+        Permission.update(Role.user(userIdA)),
+        Permission.delete(Role.user(userIdA)),
+      ],
     );
-    assert(gameDoc.$id === gameId, `Game row created with id ${gameId.slice(0,8)}…`);
+    assert(gameDoc.$id === gameId, `Game row created with id ${gameId.slice(0, 8)}…`);
 
     const hostPlayerDoc = await A.databases.createDocument<PlayerRow>(
-      DB_ID, TABLE.PLAYERS, hostPlayerId,
-      { gameId, name: "Alice", color: "sky", userId: userIdA, completedPhaseIds: "[]", declaredPhaseId: null, isCompletedThisRound: false },
-      [Permission.read(Role.any()), Permission.update(Role.user(userIdA)), Permission.delete(Role.user(userIdA))],
+      DB_ID,
+      TABLE.PLAYERS,
+      hostPlayerId,
+      {
+        gameId,
+        name: "Alice",
+        color: "sky",
+        userId: userIdA,
+        completedPhaseIds: "[]",
+        declaredPhaseId: null,
+        isCompletedThisRound: false,
+      },
+      [
+        Permission.read(Role.any()),
+        Permission.update(Role.user(userIdA)),
+        Permission.delete(Role.user(userIdA)),
+      ],
     );
     assert(hostPlayerDoc.$id === hostPlayerId, "Host player row created");
 
@@ -180,9 +241,23 @@ async function main() {
 
     const guestPlayerId = ID.unique();
     const guestPlayerDoc = await B.databases.createDocument<PlayerRow>(
-      DB_ID, TABLE.PLAYERS, guestPlayerId,
-      { gameId, name: "Bob", color: "rose", userId: userIdB, completedPhaseIds: "[]", declaredPhaseId: null, isCompletedThisRound: false },
-      [Permission.read(Role.any()), Permission.update(Role.user(userIdB)), Permission.delete(Role.user(userIdB))],
+      DB_ID,
+      TABLE.PLAYERS,
+      guestPlayerId,
+      {
+        gameId,
+        name: "Bob",
+        color: "rose",
+        userId: userIdB,
+        completedPhaseIds: "[]",
+        declaredPhaseId: null,
+        isCompletedThisRound: false,
+      },
+      [
+        Permission.read(Role.any()),
+        Permission.update(Role.user(userIdB)),
+        Permission.delete(Role.user(userIdB)),
+      ],
     );
     assert(guestPlayerDoc.$id === guestPlayerId, "Guest player row created");
 
@@ -192,7 +267,9 @@ async function main() {
 
     // ── 4. rowsToGame adapter ─────────────────────────────────────────────────
     console.log("\n4. Row→Game adapter");
-    const playerDocs = await A.databases.listDocuments<PlayerRow>(DB_ID, TABLE.PLAYERS, [Query.equal("gameId", gameId)]);
+    const playerDocs = await A.databases.listDocuments<PlayerRow>(DB_ID, TABLE.PLAYERS, [
+      Query.equal("gameId", gameId),
+    ]);
     const game = rowsToGame(gameDoc, playerDocs.documents);
     assert(game.id === gameId, "Game id matches");
     assert(game.players.length === 2, `Game has 2 players (got ${game.players.length})`);
@@ -207,14 +284,19 @@ async function main() {
         B.realtime,
         channel,
         (p) => (p as { isCompletedThisRound?: boolean }).isCompletedThisRound === true,
-        () => A.databases.updateDocument<PlayerRow>(DB_ID, TABLE.PLAYERS, hostPlayerId, { isCompletedThisRound: true }),
+        () =>
+          A.databases.updateDocument<PlayerRow>(DB_ID, TABLE.PLAYERS, hostPlayerId, {
+            isCompletedThisRound: true,
+          }),
       );
       pass("Realtime event received in B within 10s ✓");
     } catch (e) {
       fail(`Realtime event not received: ${(e as Error).message}`);
     }
 
-    await A.databases.updateDocument(DB_ID, TABLE.PLAYERS, hostPlayerId, { isCompletedThisRound: false });
+    await A.databases.updateDocument(DB_ID, TABLE.PLAYERS, hostPlayerId, {
+      isCompletedThisRound: false,
+    });
 
     // ── 6. Permission proof: B cannot write A's player row ────────────────────
     console.log("\n6. Row Security: B cannot write A's player row");
@@ -226,11 +308,16 @@ async function main() {
         permissionDenied = true;
       }
     }
-    assert(permissionDenied, "B received 401/403 trying to write A's player row (Row Security works)");
+    assert(
+      permissionDenied,
+      "B received 401/403 trying to write A's player row (Row Security works)",
+    );
 
     // ── 7. endRound self-commit ───────────────────────────────────────────────
     console.log("\n7. endRound self-commit");
-    await A.databases.updateDocument(DB_ID, TABLE.PLAYERS, hostPlayerId, { isCompletedThisRound: true });
+    await A.databases.updateDocument(DB_ID, TABLE.PLAYERS, hostPlayerId, {
+      isCompletedThisRound: true,
+    });
     await A.databases.updateDocument(DB_ID, TABLE.GAMES, gameId, { round: 2 });
     await A.databases.updateDocument(DB_ID, TABLE.PLAYERS, hostPlayerId, {
       completedPhaseIds: JSON.stringify(["p1"]),
@@ -239,7 +326,11 @@ async function main() {
     });
 
     const updatedGame = await A.databases.getDocument<GameRow>(DB_ID, TABLE.GAMES, gameId);
-    const updatedPlayer = await A.databases.getDocument<PlayerRow>(DB_ID, TABLE.PLAYERS, hostPlayerId);
+    const updatedPlayer = await A.databases.getDocument<PlayerRow>(
+      DB_ID,
+      TABLE.PLAYERS,
+      hostPlayerId,
+    );
 
     assert(updatedGame.round === 2, "Game round advanced to 2");
     assert(
@@ -258,12 +349,16 @@ async function main() {
       await waitForEvent(
         B.realtime,
         reactionChannel,
-        (p) => (p as { emoji?: string }).emoji === "🎉" && (p as { gameId?: string }).gameId === gameId,
-        () => A.databases.createDocument<ReactionRow>(
-          DB_ID, TABLE.REACTIONS, reactionId,
-          { gameId, playerId: hostPlayerId, emoji: "🎉", createdAt: new Date().toISOString() },
-          [Permission.read(Role.any())],
-        ),
+        (p) =>
+          (p as { emoji?: string }).emoji === "🎉" && (p as { gameId?: string }).gameId === gameId,
+        () =>
+          A.databases.createDocument<ReactionRow>(
+            DB_ID,
+            TABLE.REACTIONS,
+            reactionId,
+            { gameId, playerId: hostPlayerId, emoji: "🎉", createdAt: new Date().toISOString() },
+            [Permission.read(Role.any())],
+          ),
       );
       pass("Reaction realtime event received in B within 10s ✓");
     } catch (e) {
@@ -275,8 +370,14 @@ async function main() {
     const ONLINE_THRESHOLD_MS = 25_000;
     const recentTime = new Date().toISOString();
     const oldTime = new Date(Date.now() - ONLINE_THRESHOLD_MS - 5000).toISOString();
-    assert(Date.now() - new Date(recentTime).getTime() < ONLINE_THRESHOLD_MS, "Recent lastSeen → isOnline = true");
-    assert(!(Date.now() - new Date(oldTime).getTime() < ONLINE_THRESHOLD_MS), "Old lastSeen → isOnline = false");
+    assert(
+      Date.now() - new Date(recentTime).getTime() < ONLINE_THRESHOLD_MS,
+      "Recent lastSeen → isOnline = true",
+    );
+    assert(
+      !(Date.now() - new Date(oldTime).getTime() < ONLINE_THRESHOLD_MS),
+      "Old lastSeen → isOnline = false",
+    );
 
     console.log(`\n=== All tests complete ===`);
     if (process.exitCode) {

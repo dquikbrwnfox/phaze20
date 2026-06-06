@@ -11,7 +11,7 @@
   --color-bg-overlay: oklch(8% 0.02 280 / 80%);
 
   --color-accent: oklch(62% 0.28 290);
-  --color-accent-warm: oklch(75% 0.22 75);   /* amber gold — setup/CTA */
+  --color-accent-warm: oklch(75% 0.22 75); /* amber gold — setup/CTA */
   --color-success: oklch(72% 0.22 145);
   --color-muted: oklch(55% 0.01 280);
   --color-border: oklch(25% 0.03 280);
@@ -25,8 +25,8 @@
   --color-player-rose: oklch(65% 0.25 15);
   --color-player-amber: oklch(72% 0.22 75);
   --color-player-lime: oklch(72% 0.22 135);
-  --color-player-teal: oklch(68% 0.20 185);
-  --color-player-sky: oklch(68% 0.20 225);
+  --color-player-teal: oklch(68% 0.2 185);
+  --color-player-sky: oklch(68% 0.2 225);
   --color-player-violet: oklch(62% 0.25 275);
   --color-player-fuchsia: oklch(65% 0.28 310);
   --color-player-orange: oklch(70% 0.23 50);
@@ -34,9 +34,17 @@
 
 /* ── Keyframes ───────────────────────────────────────────────────── */
 @keyframes confetti-fall {
-  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
-  80%  { opacity: 1; }
-  100% { transform: translateY(110vh) rotate(600deg); opacity: 0; }
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(600deg);
+    opacity: 0;
+  }
 }
 
 @keyframes fade-up {
@@ -84,14 +92,28 @@
 
 /* ── Aurora background ───────────────────────────────────────────── */
 @keyframes aurora-drift-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(6%, 4%) scale(1.05); }
-  66%       { transform: translate(-4%, 8%) scale(0.97); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(6%, 4%) scale(1.05);
+  }
+  66% {
+    transform: translate(-4%, 8%) scale(0.97);
+  }
 }
 @keyframes aurora-drift-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  40%       { transform: translate(-8%, -5%) scale(1.08); }
-  70%       { transform: translate(5%, -10%) scale(0.95); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  40% {
+    transform: translate(-8%, -5%) scale(1.08);
+  }
+  70% {
+    transform: translate(5%, -10%) scale(0.95);
+  }
 }
 
 /* ── Viewport-responsive font scale ──────────────────────────────── */
@@ -105,8 +127,12 @@
 }
 
 /* Legacy attribute-based overrides (kept for compat, unused) */
-[data-font-size="lg"]  { font-size: 112%; }
-[data-font-size="xl"]  { font-size: 126%; }
+[data-font-size="lg"] {
+  font-size: 112%;
+}
+[data-font-size="xl"] {
+  font-size: 126%;
+}
 
 /* ── Reduce-motion guard — suppress motion/react animations ──────── */
 [data-reduce-motion="true"] *,
@@ -116,7 +142,6 @@
   animation-iteration-count: 1 !important;
   transition-duration: 0.001ms !important;
 }
-
 
 /* ── Base Layer ──────────────────────────────────────────────────── */
 @layer base {
@@ -234,7 +259,7 @@
     font-family: var(--font-display);
     font-weight: 700;
     color: white;
-    font-size: 0.9375rem;   /* ~15px, between text-sm and text-base */
+    font-size: 0.9375rem; /* ~15px, between text-sm and text-base */
     margin-bottom: 0.75rem;
   }
 
@@ -277,7 +302,7 @@
     right: -5%;
     background: radial-gradient(ellipse, oklch(65% 0.25 15) 0%, transparent 70%);
     animation: aurora-drift-2 28s ease-in-out infinite;
-    opacity: 0.10;
+    opacity: 0.1;
   }
   [data-reduce-fx="true"] .aurora-bg {
     display: none;
@@ -285,8 +310,12 @@
 
   /* Stats ticker */
   @keyframes ticker-scroll {
-    0%   { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
   }
   .ticker-track {
     animation: ticker-scroll 18s linear infinite;
@@ -317,7 +346,9 @@
     font-family: var(--font-display);
     font-weight: 700;
     font-size: 1rem;
-    transition: background-color 150ms, transform 100ms;
+    transition:
+      background-color 150ms,
+      transform 100ms;
     outline: none;
   }
   .setup-cta:hover {
@@ -400,7 +431,9 @@
    ─────────────────────────────────────────────────────────────────── */
 
 /* Kill aurora — animated blur is the #1 FPS killer on weak GPUs */
-html.lite-mode .aurora-bg { display: none; }
+html.lite-mode .aurora-bg {
+  display: none;
+}
 
 /* Opaque headers/footers — backdrop-filter: blur() tanks frame rate */
 html.lite-mode .page-header {
@@ -415,8 +448,22 @@ html.lite-mode .page-footer {
 }
 
 /* Scale up tap targets for TV/cursor navigation */
-html.ps5 .player-avatar       { width: 2.25rem; height: 2.25rem; }
-html.ps5 .player-avatar-sm    { width: 1.5rem;  height: 1.5rem;  }
-html.ps5 .section-heading     { font-size: 1.1rem; }
-html.ps5 button                { min-height: 3rem; font-size: 1rem; }
-html.ps5 .btn-back             { width: 2.75rem; height: 2.75rem; }
+html.ps5 .player-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+html.ps5 .player-avatar-sm {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+html.ps5 .section-heading {
+  font-size: 1.1rem;
+}
+html.ps5 button {
+  min-height: 3rem;
+  font-size: 1rem;
+}
+html.ps5 .btn-back {
+  width: 2.75rem;
+  height: 2.75rem;
+}

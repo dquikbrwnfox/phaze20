@@ -1,58 +1,76 @@
-import { useNavigate, useSearchParams } from "react-router-dom"
-import { useState, useEffect } from "react"
-import { useTrackerStore } from "@/stores/trackerStore"
-import { useAuthStore } from "@/stores/authStore"
-import { useLibraryStore, resolvePhases } from "@/stores/libraryStore"
-import { BUILTIN_PHASE_SETS, BUILTIN_PHASES } from "@/lib/phaseData"
-import type { PlayerColor, PhaseSet } from "@/types"
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useTrackerStore } from "@/stores/trackerStore";
+import { useAuthStore } from "@/stores/authStore";
+import { useLibraryStore, resolvePhases } from "@/stores/libraryStore";
+import { BUILTIN_PHASE_SETS, BUILTIN_PHASES } from "@/lib/phaseData";
+import type { PlayerColor, PhaseSet } from "@/types";
 
-const COLORS: PlayerColor[] = ["rose", "amber", "lime", "teal", "sky", "violet", "fuchsia", "orange"]
+const COLORS: PlayerColor[] = [
+  "rose",
+  "amber",
+  "lime",
+  "teal",
+  "sky",
+  "violet",
+  "fuchsia",
+  "orange",
+];
 
 export default function SetupPage() {
-  const navigate = useNavigate()
-  const [params] = useSearchParams()
-  const isJoin = params.get("join") === "1"
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const isJoin = params.get("join") === "1";
 
-  const { createGame, joinGame, status } = useTrackerStore()
-  const { userId } = useAuthStore()
-  const { userSets, load } = useLibraryStore()
+  const { createGame, joinGame, status } = useTrackerStore();
+  const { userId } = useAuthStore();
+  const { userSets, load } = useLibraryStore();
 
-  const [name, setName] = useState("")
-  const [color, setColor] = useState<PlayerColor>("sky")
-  const [joinCode, setJoinCode] = useState("")
-  const [phaseSetId, setPhaseSetId] = useState(BUILTIN_PHASE_SETS[0].id)
+  const [name, setName] = useState("");
+  const [color, setColor] = useState<PlayerColor>("sky");
+  const [joinCode, setJoinCode] = useState("");
+  const [phaseSetId, setPhaseSetId] = useState(BUILTIN_PHASE_SETS[0].id);
 
   useEffect(() => {
-    if (userId) void load(userId)
-  }, [userId, load])
+    if (userId) void load(userId);
+  }, [userId, load]);
 
-  const allSets: PhaseSet[] = [...BUILTIN_PHASE_SETS, ...userSets]
+  const allSets: PhaseSet[] = [...BUILTIN_PHASE_SETS, ...userSets];
 
   async function handleStart() {
-    if (!userId) return
+    if (!userId) return;
     if (isJoin) {
-      await joinGame(joinCode.trim().toUpperCase(), name.trim(), color, userId)
-      const game = useTrackerStore.getState().game
-      if (game) navigate(`/game/${game.id}`)
+      await joinGame(joinCode.trim().toUpperCase(), name.trim(), color, userId);
+      const game = useTrackerStore.getState().game;
+      if (game) navigate(`/game/${game.id}`);
     } else {
-      const set = allSets.find((s) => s.id === phaseSetId) ?? BUILTIN_PHASE_SETS[0]
+      const set = allSets.find((s) => s.id === phaseSetId) ?? BUILTIN_PHASE_SETS[0];
       const phases = set.isBuiltin
         ? BUILTIN_PHASES.filter((p) => set.phaseIds.includes(p.id))
-        : resolvePhases(set.phaseIds)
+        : resolvePhases(set.phaseIds);
       // Classic = ordered through all 10; Crazy Twenties / custom = free-choice
-      const orderedCount = phaseSetId === "classic" ? 10 : phaseSetId === "full-20" ? 20 : 0
-      const code = await createGame({ playerName: name.trim(), playerColor: color, userId, phasesSnapshot: phases, phaseSetId, orderedCount })
-      const game = useTrackerStore.getState().game
-      if (game) navigate(`/game/${game.id}?code=${code}`)
+      const orderedCount = phaseSetId === "classic" ? 10 : phaseSetId === "full-20" ? 20 : 0;
+      const code = await createGame({
+        playerName: name.trim(),
+        playerColor: color,
+        userId,
+        phasesSnapshot: phases,
+        phaseSetId,
+        orderedCount,
+      });
+      const game = useTrackerStore.getState().game;
+      if (game) navigate(`/game/${game.id}?code=${code}`);
     }
   }
 
-  const busy = status === "loading"
+  const busy = status === "loading";
 
   return (
     <div className="page-root">
       <header className="page-header">
-        <button className="btn-back" onClick={() => navigate("/")}>←</button>
+        <button className="btn-back" onClick={() => navigate("/")}>
+          ←
+        </button>
         <h2 className="font-display font-bold text-white">{isJoin ? "Join game" : "New game"}</h2>
       </header>
 
@@ -134,5 +152,5 @@ export default function SetupPage() {
         </button>
       </footer>
     </div>
-  )
+  );
 }

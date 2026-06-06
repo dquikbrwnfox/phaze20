@@ -22,7 +22,12 @@ interface TrackerState {
   recentReactions: ReactionEvent[];
 
   createGame: (opts: CreateGameOpts) => Promise<string>;
-  joinGame: (code: string, playerName: string, playerColor: PlayerColor, userId: string) => Promise<void>;
+  joinGame: (
+    code: string,
+    playerName: string,
+    playerColor: PlayerColor,
+    userId: string,
+  ) => Promise<void>;
   leaveGame: () => void;
   toggleCompletion: (playerId: string) => Promise<void>;
   declarePhase: (playerId: string, phaseId: string) => Promise<void>;
@@ -43,7 +48,10 @@ interface CreateGameOpts {
 let unsub: (() => void) | null = null;
 
 function stopSubscription() {
-  if (unsub) { unsub(); unsub = null; }
+  if (unsub) {
+    unsub();
+    unsub = null;
+  }
 }
 
 function generateJoinCode(): string {
@@ -120,11 +128,10 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
   async joinGame(code, playerName, playerColor, userId) {
     set({ status: "loading", error: null });
     try {
-      const gameRows = await databases.listDocuments<GameRow>(
-        DB_ID,
-        TABLE.GAMES,
-        [Query.equal("joinCode", code), Query.equal("status", "active")],
-      );
+      const gameRows = await databases.listDocuments<GameRow>(DB_ID, TABLE.GAMES, [
+        Query.equal("joinCode", code),
+        Query.equal("status", "active"),
+      ]);
 
       if (!gameRows.documents.length) throw new Error("Game not found or already finished");
       const gameRow = gameRows.documents[0];
@@ -286,7 +293,9 @@ async function subscribeToGame(
     const evts = response.events as string[];
     const isGameEvt = evts.some((e) => e.includes(`.${TABLE.GAMES}.`));
     const isPlayerEvt = evts.some((e) => e.includes(`.${TABLE.PLAYERS}.`));
-    const isReactionEvt = evts.some((e) => e.includes(`.${TABLE.REACTIONS}.`) && e.endsWith(".create"));
+    const isReactionEvt = evts.some(
+      (e) => e.includes(`.${TABLE.REACTIONS}.`) && e.endsWith(".create"),
+    );
 
     if (isGameEvt || isPlayerEvt) {
       const [gd, pd] = await Promise.all([
@@ -299,7 +308,12 @@ async function subscribeToGame(
     if (isReactionEvt) {
       const row = response.payload as ReactionRow;
       if (row.gameId !== gameId) return;
-      const reaction: ReactionEvent = { id: row.$id, playerId: row.playerId, emoji: row.emoji, at: Date.now() };
+      const reaction: ReactionEvent = {
+        id: row.$id,
+        playerId: row.playerId,
+        emoji: row.emoji,
+        at: Date.now(),
+      };
       set({ recentReactions: [...get().recentReactions.slice(-9), reaction] });
       setTimeout(() => {
         const current = get().recentReactions.filter((r) => r.id !== reaction.id);
@@ -308,7 +322,9 @@ async function subscribeToGame(
     }
   });
 
-  unsub = () => { void (sub as { close?: () => void }).close?.(); };
+  unsub = () => {
+    (sub as { close?: () => void }).close?.();
+  };
 }
 
 // ─── Local helpers ────────────────────────────────────────────────────────────
@@ -324,17 +340,22 @@ function patchPlayer(
   set({
     game: {
       ...game,
-      players: game.players.map((p) => p.id === playerId ? { ...p, ...patch } : p),
+      players: game.players.map((p) => (p.id === playerId ? { ...p, ...patch } : p)),
     },
   });
 }
 
-function resolveCurrentPhase(player: import("@/types").Player, game: Game): { currentPhase: Phase | null } {
+function resolveCurrentPhase(
+  player: import("@/types").Player,
+  game: Game,
+): { currentPhase: Phase | null } {
   const { phasesSnapshot, orderedCount } = game;
   const completedCount = player.completedPhaseIds.length;
   const isInOrdered = completedCount < orderedCount;
   const currentPhase = isInOrdered
     ? (phasesSnapshot[completedCount] ?? null)
-    : (player.declaredPhaseId ? phasesSnapshot.find((p) => p.id === player.declaredPhaseId) ?? null : null);
+    : player.declaredPhaseId
+      ? (phasesSnapshot.find((p) => p.id === player.declaredPhaseId) ?? null)
+      : null;
   return { currentPhase };
 }

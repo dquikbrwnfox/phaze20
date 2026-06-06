@@ -1,457 +1,421 @@
 {
-    "projectId": "6a228c77000c28cb23ec",
-    "endpoint": "https://nyc.cloud.appwrite.io/v1",
-    "functions": [
+  "projectId": "6a228c77000c28cb23ec",
+  "endpoint": "https://nyc.cloud.appwrite.io/v1",
+  "functions": [
+    {
+      "$id": "cleanup-reactions",
+      "name": "cleanup-reactions",
+      "enabled": true,
+      "live": true,
+      "logging": true,
+      "runtime": "node-22",
+      "schedule": "0 * * * *",
+      "timeout": 15,
+      "entrypoint": "src/main.js",
+      "commands": "npm install",
+      "version": "v3",
+      "path": "functions/cleanup-reactions",
+      "vars": [
         {
-            "$id": "cleanup-reactions",
-            "name": "cleanup-reactions",
-            "enabled": true,
-            "live": true,
-            "logging": true,
-            "runtime": "node-22",
-            "schedule": "0 * * * *",
-            "timeout": 15,
-            "entrypoint": "src/main.js",
-            "commands": "npm install",
-            "version": "v3",
-            "path": "functions/cleanup-reactions",
-            "vars": [
-                {
-                    "key": "APPWRITE_ENDPOINT",
-                    "value": "https://nyc.cloud.appwrite.io/v1"
-                },
-                {
-                    "key": "APPWRITE_PROJECT_ID",
-                    "value": "6a228c77000c28cb23ec"
-                },
-                {
-                    "key": "APPWRITE_DB_ID",
-                    "value": "phaze20"
-                },
-                {
-                    "key": "REACTION_MAX_AGE_MINUTES",
-                    "value": "60"
-                }
-            ]
+          "key": "APPWRITE_ENDPOINT",
+          "value": "https://nyc.cloud.appwrite.io/v1"
+        },
+        {
+          "key": "APPWRITE_PROJECT_ID",
+          "value": "6a228c77000c28cb23ec"
+        },
+        {
+          "key": "APPWRITE_DB_ID",
+          "value": "phaze20"
+        },
+        {
+          "key": "REACTION_MAX_AGE_MINUTES",
+          "value": "60"
         }
-    ],
-    "sites": [
+      ]
+    }
+  ],
+  "sites": [
+    {
+      "$id": "phaze20-app",
+      "name": "Phaze20",
+      "logging": true,
+      "framework": "react",
+      "timeout": 30,
+      "installCommand": "npm install -g pnpm && pnpm install",
+      "buildCommand": "pnpm build",
+      "outputDirectory": "./dist",
+      "specification": "s-1vcpu-512mb",
+      "buildRuntime": "node-22",
+      "adapter": "static",
+      "fallbackFile": "index.html",
+      "path": "."
+    }
+  ],
+  "tablesDB": [
+    {
+      "$id": "phaze20",
+      "name": "phaze20",
+      "enabled": true
+    }
+  ],
+  "tables": [
+    {
+      "$id": "games",
+      "$permissions": ["create(\"users\")", "read(\"any\")"],
+      "databaseId": "phaze20",
+      "name": "games",
+      "enabled": true,
+      "rowSecurity": true,
+      "columns": [
         {
-            "$id": "phaze20-app",
-            "name": "Phaze20",
-            "logging": true,
-            "framework": "react",
-            "timeout": 30,
-            "installCommand": "npm install -g pnpm && pnpm install",
-            "buildCommand": "pnpm build",
-            "outputDirectory": "./dist",
-            "specification": "s-1vcpu-512mb",
-            "buildRuntime": "node-22",
-            "adapter": "static",
-            "fallbackFile": "index.html",
-            "path": "."
+          "key": "joinCode",
+          "type": "varchar",
+          "required": true,
+          "size": 10,
+          "array": false
+        },
+        {
+          "key": "status",
+          "type": "varchar",
+          "required": true,
+          "size": 20,
+          "array": false
+        },
+        {
+          "key": "round",
+          "type": "integer",
+          "required": true,
+          "min": 1,
+          "max": 999,
+          "array": false
+        },
+        {
+          "key": "orderedCount",
+          "type": "integer",
+          "required": true,
+          "min": 0,
+          "max": 100,
+          "array": false
+        },
+        {
+          "key": "phaseSetId",
+          "type": "varchar",
+          "required": true,
+          "size": 100,
+          "array": false
+        },
+        {
+          "key": "phasesSnapshot",
+          "type": "longtext",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "hostId",
+          "type": "varchar",
+          "required": true,
+          "size": 36,
+          "array": false
+        },
+        {
+          "key": "winnerPlayerId",
+          "type": "varchar",
+          "required": false,
+          "size": 36,
+          "array": false
+        },
+        {
+          "key": "createdAt",
+          "type": "integer",
+          "required": true,
+          "min": 0,
+          "array": false
+        },
+        {
+          "key": "finishedAt",
+          "type": "integer",
+          "required": false,
+          "min": 0,
+          "array": false
         }
-    ],
-    "tablesDB": [
+      ],
+      "indexes": [
         {
-            "$id": "phaze20",
-            "name": "phaze20",
-            "enabled": true
+          "key": "idx_joinCode",
+          "type": "unique",
+          "attributes": ["joinCode"]
+        },
+        {
+          "key": "idx_status",
+          "type": "key",
+          "attributes": ["status"]
         }
-    ],
-    "tables": [
+      ]
+    },
+    {
+      "$id": "players",
+      "$permissions": ["create(\"users\")", "read(\"any\")"],
+      "databaseId": "phaze20",
+      "name": "players",
+      "enabled": true,
+      "rowSecurity": true,
+      "columns": [
         {
-            "$id": "games",
-            "$permissions": [
-                "create(\"users\")",
-                "read(\"any\")"
-            ],
-            "databaseId": "phaze20",
-            "name": "games",
-            "enabled": true,
-            "rowSecurity": true,
-            "columns": [
-                {
-                    "key": "joinCode",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 10,
-                    "array": false
-                },
-                {
-                    "key": "status",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 20,
-                    "array": false
-                },
-                {
-                    "key": "round",
-                    "type": "integer",
-                    "required": true,
-                    "min": 1,
-                    "max": 999,
-                    "array": false
-                },
-                {
-                    "key": "orderedCount",
-                    "type": "integer",
-                    "required": true,
-                    "min": 0,
-                    "max": 100,
-                    "array": false
-                },
-                {
-                    "key": "phaseSetId",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 100,
-                    "array": false
-                },
-                {
-                    "key": "phasesSnapshot",
-                    "type": "longtext",
-                    "required": true,
-                    "array": false
-                },
-                {
-                    "key": "hostId",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 36,
-                    "array": false
-                },
-                {
-                    "key": "winnerPlayerId",
-                    "type": "varchar",
-                    "required": false,
-                    "size": 36,
-                    "array": false
-                },
-                {
-                    "key": "createdAt",
-                    "type": "integer",
-                    "required": true,
-                    "min": 0,
-                    "array": false
-                },
-                {
-                    "key": "finishedAt",
-                    "type": "integer",
-                    "required": false,
-                    "min": 0,
-                    "array": false
-                }
-            ],
-            "indexes": [
-                {
-                    "key": "idx_joinCode",
-                    "type": "unique",
-                    "attributes": [
-                        "joinCode"
-                    ]
-                },
-                {
-                    "key": "idx_status",
-                    "type": "key",
-                    "attributes": [
-                        "status"
-                    ]
-                }
-            ]
+          "key": "gameId",
+          "type": "varchar",
+          "required": true,
+          "size": 36,
+          "array": false
         },
         {
-            "$id": "players",
-            "$permissions": [
-                "create(\"users\")",
-                "read(\"any\")"
-            ],
-            "databaseId": "phaze20",
-            "name": "players",
-            "enabled": true,
-            "rowSecurity": true,
-            "columns": [
-                {
-                    "key": "gameId",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 36,
-                    "array": false
-                },
-                {
-                    "key": "name",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 100,
-                    "array": false
-                },
-                {
-                    "key": "color",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 20,
-                    "array": false
-                },
-                {
-                    "key": "userId",
-                    "type": "varchar",
-                    "required": false,
-                    "size": 36,
-                    "array": false
-                },
-                {
-                    "key": "imageUrl",
-                    "type": "varchar",
-                    "required": false,
-                    "size": 500,
-                    "array": false
-                },
-                {
-                    "key": "completedPhaseIds",
-                    "type": "text",
-                    "required": true,
-                    "array": false
-                },
-                {
-                    "key": "declaredPhaseId",
-                    "type": "varchar",
-                    "required": false,
-                    "size": 36,
-                    "array": false
-                },
-                {
-                    "key": "isCompletedThisRound",
-                    "type": "boolean",
-                    "required": true,
-                    "array": false
-                }
-            ],
-            "indexes": [
-                {
-                    "key": "idx_gameId",
-                    "type": "key",
-                    "attributes": [
-                        "gameId"
-                    ]
-                }
-            ]
+          "key": "name",
+          "type": "varchar",
+          "required": true,
+          "size": 100,
+          "array": false
         },
         {
-            "$id": "presence",
-            "$permissions": [
-                "create(\"users\")",
-                "read(\"any\")"
-            ],
-            "databaseId": "phaze20",
-            "name": "presence",
-            "enabled": true,
-            "rowSecurity": true,
-            "columns": [
-                {
-                    "key": "gameId",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 36,
-                    "array": false
-                },
-                {
-                    "key": "playerId",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 36,
-                    "array": false
-                },
-                {
-                    "key": "lastSeen",
-                    "type": "datetime",
-                    "required": true,
-                    "array": false
-                },
-                {
-                    "key": "isThinking",
-                    "type": "boolean",
-                    "required": true,
-                    "array": false
-                }
-            ],
-            "indexes": [
-                {
-                    "key": "idx_presence_game",
-                    "type": "key",
-                    "attributes": [
-                        "gameId"
-                    ]
-                },
-                {
-                    "key": "idx_presence_player",
-                    "type": "key",
-                    "attributes": [
-                        "playerId"
-                    ]
-                }
-            ]
+          "key": "color",
+          "type": "varchar",
+          "required": true,
+          "size": 20,
+          "array": false
         },
         {
-            "$id": "reactions",
-            "$permissions": [
-                "create(\"users\")",
-                "read(\"any\")"
-            ],
-            "databaseId": "phaze20",
-            "name": "reactions",
-            "enabled": true,
-            "rowSecurity": false,
-            "columns": [
-                {
-                    "key": "gameId",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 36,
-                    "array": false
-                },
-                {
-                    "key": "playerId",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 36,
-                    "array": false
-                },
-                {
-                    "key": "emoji",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 10,
-                    "array": false
-                },
-                {
-                    "key": "createdAt",
-                    "type": "datetime",
-                    "required": true,
-                    "array": false
-                }
-            ],
-            "indexes": [
-                {
-                    "key": "idx_reactions_game",
-                    "type": "key",
-                    "attributes": [
-                        "gameId"
-                    ]
-                },
-                {
-                    "key": "idx_reactions_createdAt",
-                    "type": "key",
-                    "attributes": [
-                        "createdAt"
-                    ]
-                }
-            ]
+          "key": "userId",
+          "type": "varchar",
+          "required": false,
+          "size": 36,
+          "array": false
         },
         {
-            "$id": "phaseSets",
-            "$permissions": [
-                "create(\"users\")",
-                "read(\"any\")"
-            ],
-            "databaseId": "phaze20",
-            "name": "phaseSets",
-            "enabled": true,
-            "rowSecurity": false,
-            "columns": [
-                {
-                    "key": "name",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 100,
-                    "array": false
-                },
-                {
-                    "key": "description",
-                    "type": "varchar",
-                    "required": false,
-                    "size": 300,
-                    "array": false
-                },
-                {
-                    "key": "phaseIds",
-                    "type": "text",
-                    "required": true,
-                    "array": false
-                },
-                {
-                    "key": "createdBy",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 36,
-                    "array": false
-                }
-            ],
-            "indexes": [
-                {
-                    "key": "idx_phaseSets_user",
-                    "type": "key",
-                    "attributes": [
-                        "createdBy"
-                    ]
-                }
-            ]
+          "key": "imageUrl",
+          "type": "varchar",
+          "required": false,
+          "size": 500,
+          "array": false
         },
         {
-            "$id": "phases",
-            "$permissions": [
-                "create(\"users\")",
-                "read(\"any\")"
-            ],
-            "databaseId": "phaze20",
-            "name": "phases",
-            "enabled": true,
-            "rowSecurity": false,
-            "columns": [
-                {
-                    "key": "number",
-                    "type": "integer",
-                    "required": true,
-                    "min": 1,
-                    "array": false
-                },
-                {
-                    "key": "rule",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 200,
-                    "array": false
-                },
-                {
-                    "key": "constraint",
-                    "type": "varchar",
-                    "required": false,
-                    "size": 50,
-                    "array": false
-                },
-                {
-                    "key": "setId",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 36,
-                    "array": false
-                },
-                {
-                    "key": "createdBy",
-                    "type": "varchar",
-                    "required": true,
-                    "size": 36,
-                    "array": false
-                }
-            ],
-            "indexes": [
-                {
-                    "key": "idx_phases_set",
-                    "type": "key",
-                    "attributes": [
-                        "setId"
-                    ]
-                }
-            ]
+          "key": "completedPhaseIds",
+          "type": "text",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "declaredPhaseId",
+          "type": "varchar",
+          "required": false,
+          "size": 36,
+          "array": false
+        },
+        {
+          "key": "isCompletedThisRound",
+          "type": "boolean",
+          "required": true,
+          "array": false
         }
-    ]
+      ],
+      "indexes": [
+        {
+          "key": "idx_gameId",
+          "type": "key",
+          "attributes": ["gameId"]
+        }
+      ]
+    },
+    {
+      "$id": "presence",
+      "$permissions": ["create(\"users\")", "read(\"any\")"],
+      "databaseId": "phaze20",
+      "name": "presence",
+      "enabled": true,
+      "rowSecurity": true,
+      "columns": [
+        {
+          "key": "gameId",
+          "type": "varchar",
+          "required": true,
+          "size": 36,
+          "array": false
+        },
+        {
+          "key": "playerId",
+          "type": "varchar",
+          "required": true,
+          "size": 36,
+          "array": false
+        },
+        {
+          "key": "lastSeen",
+          "type": "datetime",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "isThinking",
+          "type": "boolean",
+          "required": true,
+          "array": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_presence_game",
+          "type": "key",
+          "attributes": ["gameId"]
+        },
+        {
+          "key": "idx_presence_player",
+          "type": "key",
+          "attributes": ["playerId"]
+        }
+      ]
+    },
+    {
+      "$id": "reactions",
+      "$permissions": ["create(\"users\")", "read(\"any\")"],
+      "databaseId": "phaze20",
+      "name": "reactions",
+      "enabled": true,
+      "rowSecurity": false,
+      "columns": [
+        {
+          "key": "gameId",
+          "type": "varchar",
+          "required": true,
+          "size": 36,
+          "array": false
+        },
+        {
+          "key": "playerId",
+          "type": "varchar",
+          "required": true,
+          "size": 36,
+          "array": false
+        },
+        {
+          "key": "emoji",
+          "type": "varchar",
+          "required": true,
+          "size": 10,
+          "array": false
+        },
+        {
+          "key": "createdAt",
+          "type": "datetime",
+          "required": true,
+          "array": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_reactions_game",
+          "type": "key",
+          "attributes": ["gameId"]
+        },
+        {
+          "key": "idx_reactions_createdAt",
+          "type": "key",
+          "attributes": ["createdAt"]
+        }
+      ]
+    },
+    {
+      "$id": "phaseSets",
+      "$permissions": ["create(\"users\")", "read(\"any\")"],
+      "databaseId": "phaze20",
+      "name": "phaseSets",
+      "enabled": true,
+      "rowSecurity": false,
+      "columns": [
+        {
+          "key": "name",
+          "type": "varchar",
+          "required": true,
+          "size": 100,
+          "array": false
+        },
+        {
+          "key": "description",
+          "type": "varchar",
+          "required": false,
+          "size": 300,
+          "array": false
+        },
+        {
+          "key": "phaseIds",
+          "type": "text",
+          "required": true,
+          "array": false
+        },
+        {
+          "key": "createdBy",
+          "type": "varchar",
+          "required": true,
+          "size": 36,
+          "array": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_phaseSets_user",
+          "type": "key",
+          "attributes": ["createdBy"]
+        }
+      ]
+    },
+    {
+      "$id": "phases",
+      "$permissions": ["create(\"users\")", "read(\"any\")"],
+      "databaseId": "phaze20",
+      "name": "phases",
+      "enabled": true,
+      "rowSecurity": false,
+      "columns": [
+        {
+          "key": "number",
+          "type": "integer",
+          "required": true,
+          "min": 1,
+          "array": false
+        },
+        {
+          "key": "rule",
+          "type": "varchar",
+          "required": true,
+          "size": 200,
+          "array": false
+        },
+        {
+          "key": "constraint",
+          "type": "varchar",
+          "required": false,
+          "size": 50,
+          "array": false
+        },
+        {
+          "key": "setId",
+          "type": "varchar",
+          "required": true,
+          "size": 36,
+          "array": false
+        },
+        {
+          "key": "createdBy",
+          "type": "varchar",
+          "required": true,
+          "size": 36,
+          "array": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "idx_phases_set",
+          "type": "key",
+          "attributes": ["setId"]
+        }
+      ]
+    }
+  ]
 }

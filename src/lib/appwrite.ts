@@ -1,24 +1,24 @@
-import { Client, Account, Databases, Realtime } from 'appwrite'
+import { Client, Account, Databases, Realtime } from "appwrite";
 
-const endpoint = import.meta.env.VITE_APPWRITE_ENDPOINT as string
-const projectId = import.meta.env.VITE_APPWRITE_PROJECT_ID as string
+const endpoint = import.meta.env.VITE_APPWRITE_ENDPOINT as string;
+const projectId = import.meta.env.VITE_APPWRITE_PROJECT_ID as string;
 
 if (!endpoint || !projectId) {
-  throw new Error('Missing VITE_APPWRITE_ENDPOINT or VITE_APPWRITE_PROJECT_ID')
+  throw new Error("Missing VITE_APPWRITE_ENDPOINT or VITE_APPWRITE_PROJECT_ID");
 }
 
-export const client = new Client().setEndpoint(endpoint).setProject(projectId)
-export const account = new Account(client)
-export const databases = new Databases(client)
-export const realtime = new Realtime(client)
+export const client = new Client().setEndpoint(endpoint).setProject(projectId);
+export const account = new Account(client);
+export const databases = new Databases(client);
+export const realtime = new Realtime(client);
 
-export const DB_ID = (import.meta.env.VITE_APPWRITE_DB_ID as string | undefined) ?? 'phaze20'
+export const DB_ID = (import.meta.env.VITE_APPWRITE_DB_ID as string | undefined) ?? "phaze20";
 
 export const TABLE = {
-  GAMES: 'games',
-  PLAYERS: 'players',
-  PRESENCE: 'presence',
-  REACTIONS: 'reactions',
-  PHASE_SETS: 'phaseSets',
-  PHASES: 'phases',
-} as const
+  GAMES: "games",
+  PLAYERS: "players",
+  PRESENCE: "presence",
+  REACTIONS: "reactions",
+  PHASE_SETS: "phaseSets",
+  PHASES: "phases",
+} as const;

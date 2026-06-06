@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 import { computePlayerGameView, detectWinners } from "@/lib/gameUtils";
 import { calculateDifficulty, BUILTIN_PHASES, BUILTIN_PHASE_SETS } from "@/lib/phaseData";
 import { rowsToGame } from "@/lib/realtimeGame";
@@ -256,8 +256,8 @@ function resolveCurrentPhaseId(player: Player, game: Game): { currentPhaseId: st
   const isInOrdered = completedCount < orderedCount;
   const currentPhase = isInOrdered
     ? (phasesSnapshot[completedCount] ?? null)
-    : (player.declaredPhaseId
-      ? phasesSnapshot.find((p) => p.id === player.declaredPhaseId) ?? null
-      : null);
+    : player.declaredPhaseId
+      ? (phasesSnapshot.find((p) => p.id === player.declaredPhaseId) ?? null)
+      : null;
   return { currentPhaseId: currentPhase?.id ?? null };
 }

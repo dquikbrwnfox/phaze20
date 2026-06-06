@@ -37,7 +37,9 @@ export const useSettings = create<SettingsState>()(
 );
 
 /** Apply data-* attributes to `<html>` so CSS can respond. Call once in main.tsx. */
-export function applySettingsToDOM(state: Pick<SettingsState, "fontSize" | "reduceMotion" | "reduceFx">) {
+export function applySettingsToDOM(
+  state: Pick<SettingsState, "fontSize" | "reduceMotion" | "reduceFx">,
+) {
   const html = document.documentElement;
   html.dataset.fontSize = state.fontSize;
   html.dataset.reduceMotion = state.reduceMotion ? "true" : "false";

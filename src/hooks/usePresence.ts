@@ -41,7 +41,9 @@ export function usePresence(gameId: string | null, myPlayerId: string | null) {
   const setThinking = useCallback(async (thinking: boolean) => {
     if (!rowIdRef.current) return;
     try {
-      await databases.updateDocument(DB_ID, TABLE.PRESENCE, rowIdRef.current, { isThinking: thinking });
+      await databases.updateDocument(DB_ID, TABLE.PRESENCE, rowIdRef.current, {
+        isThinking: thinking,
+      });
     } catch {
       // presence is best-effort
     }
@@ -51,30 +53,44 @@ export function usePresence(gameId: string | null, myPlayerId: string | null) {
     if (!gameId) return;
 
     // Initial load
-    databases.listDocuments<PresenceRow>(DB_ID, TABLE.PRESENCE, [
-      Query.equal("gameId", gameId),
-    ]).then((res) => updateMap(res.documents)).catch(() => {});
+    databases
+      .listDocuments<PresenceRow>(DB_ID, TABLE.PRESENCE, [Query.equal("gameId", gameId)])
+      .then((res) => updateMap(res.documents))
+      .catch(() => {});
 
     // Heartbeat
     void beat();
-    const interval = setInterval(() => { void beat(); }, HEARTBEAT_INTERVAL_MS);
+    const interval = setInterval(() => {
+      void beat();
+    }, HEARTBEAT_INTERVAL_MS);
 
     // Subscribe
     const channel = `databases.${DB_ID}.collections.${TABLE.PRESENCE}.documents`;
     let subClosed = false;
     let closeSub: (() => void) | null = null;
-    realtime.subscribe(channel, (evt) => {
-      if (subClosed) return;
-      const evts = evt.events as string[];
-      if (!evts.some((e) => e.includes(`.${TABLE.PRESENCE}.`))) return;
-      const row = evt.payload as PresenceRow;
-      if (row.gameId !== gameId) return;
-      setPresenceMap((prev) => {
-        const next = new Map(prev);
-        next.set(row.playerId, { playerId: row.playerId, isOnline: isOnline(row.lastSeen), isThinking: row.isThinking });
-        return next;
-      });
-    }).then((s) => { closeSub = () => { void (s as { close?: () => void }).close?.(); }; }).catch(() => {});
+    realtime
+      .subscribe(channel, (evt) => {
+        if (subClosed) return;
+        const evts = evt.events as string[];
+        if (!evts.some((e) => e.includes(`.${TABLE.PRESENCE}.`))) return;
+        const row = evt.payload as PresenceRow;
+        if (row.gameId !== gameId) return;
+        setPresenceMap((prev) => {
+          const next = new Map(prev);
+          next.set(row.playerId, {
+            playerId: row.playerId,
+            isOnline: isOnline(row.lastSeen),
+            isThinking: row.isThinking,
+          });
+          return next;
+        });
+      })
+      .then((s) => {
+        closeSub = () => {
+          (s as { close?: () => void }).close?.();
+        };
+      })
+      .catch(() => {});
 
     return () => {
       subClosed = true;
@@ -86,7 +102,11 @@ export function usePresence(gameId: string | null, myPlayerId: string | null) {
   function updateMap(rows: PresenceRow[]) {
     const m = new Map<string, PlayerPresence>();
     for (const r of rows) {
-      m.set(r.playerId, { playerId: r.playerId, isOnline: isOnline(r.lastSeen), isThinking: r.isThinking });
+      m.set(r.playerId, {
+        playerId: r.playerId,
+        isOnline: isOnline(r.lastSeen),
+        isThinking: r.isThinking,
+      });
     }
     setPresenceMap(m);
   }

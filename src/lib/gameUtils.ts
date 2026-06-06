@@ -21,9 +21,8 @@ export function computePlayerGameView(player: Player, game: Game): PlayerGameVie
     }
   }
 
-  const canMarkComplete = !isWinner && (
-    isInOrderedSection ? true : player.declaredPhaseId !== null
-  );
+  const canMarkComplete =
+    !isWinner && (isInOrderedSection ? true : player.declaredPhaseId !== null);
 
   return {
     player,
