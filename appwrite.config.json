@@ -35,6 +35,23 @@
             ]
         }
     ],
+    "sites": [
+        {
+            "$id": "phaze20-app",
+            "name": "Phaze20",
+            "logging": true,
+            "framework": "react",
+            "timeout": 30,
+            "installCommand": "npm install -g pnpm && pnpm install",
+            "buildCommand": "pnpm build",
+            "outputDirectory": "./dist",
+            "specification": "s-1vcpu-512mb",
+            "buildRuntime": "node-22",
+            "adapter": "static",
+            "fallbackFile": "index.html",
+            "path": "."
+        }
+    ],
     "tablesDB": [
         {
             "$id": "phaze20",
