@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { account } from "@/lib/appwrite";
 import type { Models } from "appwrite";
-import { AppwriteException, OAuthProvider } from "appwrite";
+import { AppwriteException, OAuthProvider } from "appwrite"; // OAuthProvider.Github removed
 
 type AuthStatus = "loading" | "anon" | "authenticated" | "error";
 
@@ -17,7 +17,6 @@ interface AuthState {
 
   init: () => Promise<void>;
   signInGoogle: () => Promise<void>;
-  signInGithub: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -69,11 +68,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   async signInGoogle() {
     const origin = window.location.origin;
     await account.createOAuth2Session(OAuthProvider.Google, `${origin}/`, `${origin}/`);
-  },
-
-  async signInGithub() {
-    const origin = window.location.origin;
-    await account.createOAuth2Session(OAuthProvider.Github, `${origin}/`, `${origin}/`);
   },
 
   async signOut() {

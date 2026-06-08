@@ -58,6 +58,20 @@
       ]
     }
   ],
+  "buckets": [
+    {
+      "$id": "avatars",
+      "name": "avatars",
+      "enabled": true,
+      "$permissions": ["create(\"users\")", "read(\"any\")"],
+      "fileSecurity": true,
+      "maximumFileSize": 5242880,
+      "allowedFileExtensions": ["jpg", "jpeg", "png", "gif", "webp"],
+      "compression": "none",
+      "encryption": false,
+      "antivirus": false
+    }
+  ],
   "tablesDB": [
     {
       "$id": "phaze20",
