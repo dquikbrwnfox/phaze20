@@ -27,6 +27,7 @@ interface TrackerState {
     playerName: string,
     playerColor: PlayerColor,
     userId: string,
+    imageUrl?: string | null,
   ) => Promise<void>;
   leaveGame: () => void;
   toggleCompletion: (playerId: string) => Promise<void>;
@@ -40,6 +41,7 @@ interface CreateGameOpts {
   playerName: string;
   playerColor: PlayerColor;
   userId: string;
+  imageUrl?: string | null;
   phasesSnapshot: Phase[];
   phaseSetId: string;
   orderedCount: number;
@@ -65,7 +67,7 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
   myPlayerId: null,
   recentReactions: [],
 
-  async createGame({ playerName, playerColor, userId, phasesSnapshot, phaseSetId, orderedCount }) {
+  async createGame({ playerName, playerColor, userId, imageUrl, phasesSnapshot, phaseSetId, orderedCount }) {
     set({ status: "loading", error: null });
     try {
       const gameId = ID.unique();
@@ -104,6 +106,7 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
           name: playerName,
           color: playerColor,
           userId,
+          imageUrl: imageUrl ?? null,
           completedPhaseIds: JSON.stringify([]),
           declaredPhaseId: null,
           isCompletedThisRound: false,
@@ -124,7 +127,7 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
     }
   },
 
-  async joinGame(code, playerName, playerColor, userId) {
+  async joinGame(code, playerName, playerColor, userId, imageUrl) {
     set({ status: "loading", error: null });
     try {
       const gameRows = await databases.listDocuments<GameRow>(DB_ID, TABLE.GAMES, [
@@ -146,6 +149,7 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
           name: playerName,
           color: playerColor,
           userId,
+          imageUrl: imageUrl ?? null,
           completedPhaseIds: JSON.stringify([]),
           declaredPhaseId: null,
           isCompletedThisRound: false,

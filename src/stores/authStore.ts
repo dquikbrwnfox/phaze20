@@ -10,33 +10,58 @@ interface AuthState {
   user: Models.User<Models.Preferences> | null;
   /** Appwrite user $id */
   userId: string | null;
+  /** Human-readable name (from OAuth or set later) */
+  displayName: string | null;
+  /** Profile photo URL (from OAuth provider) */
+  imageUrl: string | null;
+
   init: () => Promise<void>;
   signInGoogle: () => Promise<void>;
   signInGithub: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
+function resolveImageUrl(user: Models.User<Models.Preferences>): string | null {
+  // Appwrite OAuth users may have their avatar in prefs.
+  // Prefs is a free-form object; cast to index access.
+  const p = user.prefs as Record<string, unknown>;
+  for (const key of ["avatarUrl", "imageUrl", "picture", "avatar"]) {
+    if (typeof p[key] === "string" && (p[key] as string).startsWith("http")) {
+      return p[key] as string;
+    }
+  }
+  return null;
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   status: "loading",
   user: null,
   userId: null,
+  displayName: null,
+  imageUrl: null,
 
   async init() {
     try {
       const user = await account.get();
-      set({ user, userId: user.$id, status: user.email ? "authenticated" : "anon" });
+      const isAnon = !user.email;
+      set({
+        user,
+        userId: user.$id,
+        status: isAnon ? "anon" : "authenticated",
+        displayName: user.name || null,
+        imageUrl: resolveImageUrl(user),
+      });
     } catch (err) {
       if (err instanceof AppwriteException && err.code === 401) {
-        // No session — create anonymous
         try {
           await account.createAnonymousSession();
           const user = await account.get();
-          set({ user, userId: user.$id, status: "anon" });
+          set({ user, userId: user.$id, status: "anon", displayName: null, imageUrl: null });
         } catch {
-          set({ status: "error", user: null, userId: null });
+          set({ status: "error", user: null, userId: null, displayName: null, imageUrl: null });
         }
       } else {
-        set({ status: "error", user: null, userId: null });
+        set({ status: "error", user: null, userId: null, displayName: null, imageUrl: null });
       }
     }
   },
@@ -53,8 +78,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   async signOut() {
     await account.deleteSession("current");
-    // Re-init to get a fresh anon session
-    set({ status: "loading", user: null, userId: null });
+    set({ status: "loading", user: null, userId: null, displayName: null, imageUrl: null });
     await get().init();
   },
 }));
