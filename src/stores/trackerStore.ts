@@ -111,7 +111,6 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
         [
           Permission.read(Role.any()),
           Permission.update(Role.user(userId)),
-          Permission.update(Role.label(`game-${gameId}-host`)),
           Permission.delete(Role.user(userId)),
         ],
       );
@@ -154,7 +153,7 @@ export const useTrackerStore = create<TrackerState>((set, get) => ({
         [
           Permission.read(Role.any()),
           Permission.update(Role.user(userId)),
-          Permission.update(Role.label(`game-${gameId}-host`)),
+          Permission.update(Role.user(gameRow.hostId)),
           Permission.delete(Role.user(userId)),
         ],
       );
